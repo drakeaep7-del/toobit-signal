@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="تحلیل‌گر">
+<title>تحلیل‌گر بازار — Toobit</title>
+<link rel="manifest" href="data:application/manifest+json;base64,PLACEHOLDER_MANIFEST">
+<style>
+/* ===== بخش CSS در قسمت ۲ ===== */
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-row">
+    <div class="brand">
+      <span class="brand-icon">📊</span>
+      <span class="brand-title">تحلیل‌گر بازار</span>
+    </div>
+    <div class="header-actions">
+      <span id="netStatus" class="net-status" title="وضعیت">●</span>
+    </div>
+  </div>
+</header>
+
+<main id="app" class="app-main">
+
+  <!-- ============ صفحه ۱: داشبورد ============ -->
+  <section class="page" data-page="dashboard">
+    <h2 class="page-title">داشبورد</h2>
+
+    <div class="card status-card">
+      <div class="card-title">📊 وضعیت بازار</div>
+      <div class="market-grid">
+        <div class="market-item">
+          <span class="mi-label">روند کلی</span>
+          <span class="mi-value" id="dashTrend">—</span>
+        </div>
+        <div class="market-item">
+          <span class="mi-label">نوسان</span>
+          <span class="mi-value" id="dashVol">—</span>
+        </div>
+        <div class="market-item">
+          <span class="mi-label">سیگنال فعال</span>
+          <span class="mi-value" id="dashActive">0</span>
+        </div>
+        <div class="market-item">
+          <span class="mi-label">آخرین اسکن</span>
+          <span class="mi-value" id="dashScan">—</span>
+        </div>
+      </div>
+      <div class="mock-note">⚠️ این داده آزمایشی است — اتصال واقعی به Toobit هنوز پیاده‌سازی نشده.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔥 بهترین فرصت‌های فعلی</div>
+      <div id="dashTopSignals" class="signal-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📡 سیگنال‌های فعال</div>
+      <div id="dashActiveSignals" class="signal-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 عملکرد سیستم</div>
+      <div class="perf-row">
+        <div class="perf-item"><span>کل سیگنال</span><b id="dashTotal">0</b></div>
+        <div class="perf-item"><span>سود</span><b id="dashWins">0</b></div>
+        <div class="perf-item"><span>ضرر</span><b id="dashLosses">0</b></div>
+        <div class="perf-item"><span>نرخ برد</span><b id="dashWR">—</b></div>
+      </div>
+      <div class="mock-note">آمار واقعی پس از ثبت سیگنال‌های واقعی محاسبه می‌شود.</div>
+    </div>
+  </section>
+
+  <!-- ============ صفحه ۲: اسکن بازار ============ -->
+  <section class="page" data-page="scanner">
+    <h2 class="page-title">اسکن بازار</h2>
+
+    <div class="card">
+      <div class="form-row">
+        <label>تایم‌فریم</label>
+        <select id="scanTF">
+          <option>5m</option>
+          <option>15m</option>
+          <option selected>1h</option>
+          <option>4h</option>
+          <option>1D</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>حداقل امتیاز اطمینان</label>
+        <input type="number" id="scanMinConf" value="60" min="0" max="100">
+      </div>
+      <button class="btn-primary" id="btnScan">شروع اسکن</button>
+      <div class="mock-note">⚠️ اسکن واقعی هنوز پیاده‌سازی نشده — این بخش با داده آزمایشی کار می‌کند.</div>
+    </div>
+
+    <div id="scanResults" class="signal-list"></div>
+  </section>
+
+  <!-- ============ صفحه ۳: سیگنال‌ها ============ -->
+  <section class="page" data-page="signals">
+    <h2 class="page-title">سیگنال‌ها</h2>
+    <div class="filter-row">
+      <select id="sigFilter">
+        <option value="all">همه</option>
+        <option value="LONG">خرید (LONG)</option>
+        <option value="SHORT">فروش (SHORT)</option>
+        <option value="NO_TRADE">بدون معامله</option>
+      </select>
+    </div>
+    <div id="signalsList" class="signal-list"></div>
+  </section>
+
+  <!-- ============ صفحه ۴: تحلیل یک ارز ============ -->
+  <section class="page" data-page="analyze">
+    <h2 class="page-title">تحلیل یک ارز</h2>
+
+    <div class="card">
+      <div class="form-row">
+        <label>نماد</label>
+        <input type="text" id="anSymbol" value="BTCUSDT" placeholder="مثال: BTCUSDT">
+      </div>
+      <div class="form-row">
+        <label>تایم‌فریم</label>
+        <select id="anTF">
+          <option>5m</option>
+          <option>15m</option>
+          <option selected>1h</option>
+          <option>4h</option>
+          <option>1D</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="btnAnalyze">تحلیل کن</button>
+      <div class="mock-note">⚠️ تحلیل واقعی تکنیکال هنوز پیاده‌سازی نشده.</div>
+    </div>
+
+    <div id="analyzeResult"></div>
+  </section>
+
+  <!-- ============ صفحه ۵: سیگنال‌های فعال ============ -->
+  <section class="page" data-page="active">
+    <h2 class="page-title">سیگنال‌های فعال</h2>
+    <div id="activeList" class="signal-list"></div>
+  </section>
+
+  <!-- ============ صفحه ۶: تاریخچه ============ -->
+  <section class="page" data-page="history">
+    <h2 class="page-title">تاریخچه سیگنال‌ها</h2>
+    <div id="historyList" class="signal-list"></div>
+    <button class="btn-danger" id="btnClearHistory">پاک کردن تاریخچه</button>
+  </section>
+
+  <!-- ============ صفحه ۷: آمار عملکرد ============ -->
+  <section class="page" data-page="performance">
+    <h2 class="page-title">آمار عملکرد</h2>
+    <div class="card">
+      <div class="perf-grid">
+        <div class="perf-box"><span>کل سیگنال</span><b id="perfTotal">0</b></div>
+        <div class="perf-box"><span>سود</span><b id="perfWins">0</b></div>
+        <div class="perf-box"><span>ضرر</span><b id="perfLosses">0</b></div>
+        <div class="perf-box"><span>نرخ برد</span><b id="perfWR">—</b></div>
+        <div class="perf-box"><span>میانگین R</span><b id="perfAvgR">—</b></div>
+        <div class="perf-box"><span>بهترین R</span><b id="perfBestR">—</b></div>
+      </div>
+      <div class="mock-note">آمار فقط بر اساس سیگنال‌های واقعی که نتیجه‌شان مشخص شود محاسبه می‌گردد.</div>
+    </div>
+  </section>
+
+  <!-- ============ صفحه ۸: بک‌تست ============ -->
+  <section class="page" data-page="backtest">
+    <h2 class="page-title">بک‌تست</h2>
+
+    <div class="card">
+      <div class="form-row">
+        <label>نماد</label>
+        <input type="text" id="btSymbol" value="BTCUSDT">
+      </div>
+      <div class="form-row">
+        <label>تایم‌فریم</label>
+        <select id="btTF">
+          <option>5m</option>
+          <option>15m</option>
+          <option selected>1h</option>
+          <option>4h</option>
+          <option>1D</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>سرمایه (USDT)</label>
+        <input type="number" id="btCapital" value="1000">
+      </div>
+      <div class="form-row">
+        <label>ریسک هر معامله (%)</label>
+        <input type="number" id="btRisk" value="1" step="0.1">
+      </div>
+      <button class="btn-primary" id="btnBacktest">اجرای بک‌تست</button>
+      <div class="mock-note">⚠️ بک‌تست واقعی روی داده تاریخی هنوز پیاده‌سازی نشده.</div>
+    </div>
+
+    <div id="backtestResult"></div>
+  </section>
+
+  <!-- ============ صفحه ۹: مدیریت ریسک ============ -->
+  <section class="page" data-page="risk">
+    <h2 class="page-title">مدیریت ریسک</h2>
+
+    <div class="card">
+      <div class="form-row">
+        <label>سرمایه (USDT)</label>
+        <input type="number" id="rCapital" value="1000">
+      </div>
+      <div class="form-row">
+        <label>درصد ریسک (%)</label>
+        <input type="number" id="rRisk" value="1" step="0.1">
+      </div>
+      <div class="form-row">
+        <label>قیمت ورود</label>
+        <input type="number" id="rEntry" value="100">
+      </div>
+      <div class="form-row">
+        <label>حد ضرر</label>
+        <input type="number" id="rSL" value="98">
+      </div>
+      <button class="btn-primary" id="btnCalcRisk">محاسبه حجم</button>
+    </div>
+
+    <div class="card" id="riskResultCard" style="display:none;">
+      <div class="card-title">نتیجه محاسبه</div>
+      <div class="risk-result">
+        <div class="rr-row"><span>حداکثر زیان مجاز</span><b id="rrMaxLoss">—</b></div>
+        <div class="rr-row"><span>فاصله ورود تا SL</span><b id="rrDist">—</b></div>
+        <div class="rr-row"><span>حجم پیشنهادی</span><b id="rrSize">—</b></div>
+        <div class="rr-row"><span>ارزش پوزیشن</span><b id="rrValue">—</b></div>
+      </div>
+      <div class="mock-note">این محاسبه واقعی است و روی گوشی شما انجام می‌شود.</div>
+    </div>
+  </section>
+
+  <!-- ============ صفحه ۱۰: تنظیمات ============ -->
+  <section class="page" data-page="settings">
+    <h2 class="page-title">تنظیمات</h2>
+
+    <div class="card">
+      <div class="card-title">پارامترهای پیش‌فرض</div>
+      <div class="form-row">
+        <label>سرمایه پیش‌فرض (USDT)</label>
+        <input type="number" id="setCapital" value="1000">
+      </div>
+      <div class="form-row">
+        <label>درصد ریسک پیش‌فرض</label>
+        <input type="number" id="setRisk" value="1" step="0.1">
+      </div>
+      <div class="form-row">
+        <label>حداقل امتیاز اطمینان برای سیگنال</label>
+        <input type="number" id="setMinConf" value="60">
+      </div>
+      <button class="btn-primary" id="btnSaveSettings">ذخیره تنظیمات</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">وضعیت پیاده‌سازی</div>
+      <ul class="impl-list">
+        <li class="ok">✅ رابط کاربری فارسی RTL</li>
+        <li class="ok">✅ محاسبه‌گر مدیریت ریسک (واقعی)</li>
+        <li class="ok">✅ ذخیره‌سازی محلی روی گوشی</li>
+        <li class="no">❌ اتصال به API Toobit — مرحله ۸</li>
+        <li class="no">❌ موتور تحلیل تکنیکال — مرحله ۹</li>
+        <li class="no">❌ موتور امتیازدهی سیگنال — مرحله ۱۱</li>
+        <li class="no">❌ بک‌تست روی داده تاریخی — مرحله ۱۲</li>
+        <li class="no">❌ تحلیل‌گر AI — مرحله ۱۳</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">درباره</div>
+      <p class="about-text">
+        تحلیل‌گر بازار — نسخه ۰.۱<br>
+        این نسخه فقط رابط کاربری است. برای اتصال واقعی به Toobit، مراحل بعدی باید تکمیل شوند.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button class="tab active" data-target="dashboard"><span>📊</span><small>داشبورد</small></button>
+  <button class="tab" data-target="scanner"><span>🔍</span><small>اسکن</small></button>
+  <button class="tab" data-target="signals"><span>📡</span><small>سیگنال</small></button>
+  <button class="tab" data-target="analyze"><span>🧠</span><small>تحلیل</small></button>
+  <button class="tab" data-target="risk"><span>⚖️</span><small>ریسک</small></button>
+  <button class="tab" data-target="settings"><span>⚙️</span><small>تنظیمات</small></button>
+</nav>
+
+<div class="more-menu">
+  <button class="more-toggle" id="moreToggle">⋯</button>
+  <div class="more-list" id="moreList">
+    <button data-target="active">📌 سیگنال‌های فعال</button>
+    <button data-target="history">🕓 تاریخچه</button>
+    <button data-target="performance">📈 آمار عملکرد</button>
+    <button data-target="backtest">🧪 بک‌تست</button>
+  </div>
+</div>
+
+<script>
+/* ===== بخش JS در قسمت‌های ۳ و ۴ ===== */
+</script>
+
+</body>
+</html>
